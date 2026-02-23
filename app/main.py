@@ -1,11 +1,21 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import recipes
 from .database import Base, engine
+import os
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# API Key validation
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+async def verify_api_key(api_key: str = Depends(api_key_header)):
+    if api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid API key")
+    return api_key
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,4 +31,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(recipes.router)
+app.include_router(recipes.router, dependencies=[Depends(verify_api_key)])
