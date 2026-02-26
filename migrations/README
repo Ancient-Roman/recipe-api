@@ -1,1 +1,5 @@
 Generic single-database configuration.
+
+### To run locally:
+From the project root:
+`uvicorn app.main:app --reload`

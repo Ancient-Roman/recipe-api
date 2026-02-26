@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import cast, String, or_
 
 from .. import crud, schemas, models
 from ..database import get_db
@@ -45,7 +45,7 @@ def search_recipes(
         query = query.filter(
             or_(
                 models.Recipe.title.ilike(f"%{q}%"),
-                models.Recipe.ingredients.ilike(f"%{q}%")
+                cast(models.Recipe.ingredients, String).ilike(f"%{q}%")
             )
         )
 
